@@ -16,18 +16,19 @@ import numpy as np
 from numpy import linalg
 
 from dataset import Custom_dataset
-from model import AE
+from model import *
 from utils import *
     
 # %%
 print('$ Converting .wav file into mel spectrogram $')
 wav_path = sys.argv[1]
 img_path = './output/mel_spectrogram.png'
-device = torch.device('cuda')
-model = AE().to(device)
+#device = torch.device('cuda')
+device = torch.device('cpu')
+model = autoencoder().to(device)
 model.load_state_dict(torch.load('/home/hahajjjun/Junha Park/remixer/REMIX/cache/best.pth'))
 wav2mel(wav_path)
-query_latent = inference(model, img_path, device)
+rec_img, query_latent = inference(model, img_path, device)
 with open('./cache/title.json', 'r') as file:
     path = json.load(file)['titles']
 
@@ -40,7 +41,9 @@ for idx, item in enumerate(path):
     decoder[idx] = encoder[ID].split('/')[-1].replace('-accompaniment.wav', '')
     
 # %%
-features = np.load('./cache/512_latent.npy')
+features = np.load('./cache/12_latent.npy')
+query_latent = query_latent[None,:]
+features = np.concatenate((features, query_latent), axis = 0)
 embedded = TSNE(n_components=2).fit_transform(features)
 font = fm.FontProperties(fname='./cache/asd_font.ttf')
 
@@ -54,4 +57,4 @@ plot_tsne(embedded, pca_projection, decoder)
 
 # %%
 print('$ Recommendation $')
-recommend(query_latent, features, decoder)
+recommend(embedded, decoder)

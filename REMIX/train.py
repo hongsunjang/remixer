@@ -15,7 +15,7 @@ import albumentations as A
 import matplotlib.pyplot as plt
 
 from dataset import Custom_dataset
-from model import AE
+from model import *
 
 # %%
 cfg = {
@@ -27,18 +27,18 @@ train_path = glob('/home/hahajjjun/Junha Park/remixer/REMIX/processed/*.png')
 train_dataset = Custom_dataset(train_path)
 train_loader = DataLoader(train_dataset, shuffle=False, batch_size=cfg['batch_size'])
 device = torch.device('cuda')
-model = AE().to(device)
+model = autoencoder().to(device)
 optimizer = optim.Adam(model.parameters(), lr = cfg['learning_rate'])
 
 def reconstruction_loss(x, x_prime):
-    return nn.MSELoss(reduction='mean')(x_prime, x)/(224*224)
+    return nn.MSELoss(reduction='sum')(x_prime, x)/784
 
 def train(model, optimizer, cfg):
     print('TRAINING MODEL...')
     print(cfg)
     best = 10000000
     losses = []
-    for epoch in range(20):
+    for epoch in range(200):
         latents = []
         paths = []
         train_loss = 0
@@ -56,7 +56,7 @@ def train(model, optimizer, cfg):
         if train_loss < best:
             best = train_loss
             best_latents = latents
-            torch.save(model.state_dict(), f'/home/hahajjjun/Junha Park/remixer/REMIX/best.pth')
+            torch.save(model.state_dict(), f'/home/hahajjjun/Junha Park/remixer/REMIX/cache/best.pth')
         print(f'>>> Epoch: {epoch}, Average loss: {train_loss}')
     print('PLOTTING LOSS...')
     plt.title('MSE Reconstruction Loss')
