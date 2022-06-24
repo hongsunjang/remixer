@@ -5,13 +5,14 @@ import axios from 'axios';
 import {useEffect} from 'react';
 
 const initialFormData = Object.freeze({
-  name: ''
+  name: '',
+  index: 0
 });
 
 const initialShownData = Object.freeze({
-  real_name: '',
-  preview_url: ''
 });
+
+
 
 function App() {
   useEffect(()=>{
@@ -27,7 +28,7 @@ function App() {
   }, [])
  
   const [formData, updateFormData] = useState(initialFormData);
-  const [shownData, updateShownData] = useState(initialFormData);
+  const [shownData, updateShownData] = useState(initialShownData);
   const handleChange= (e) =>{
     updateFormData({
       ...formData,
@@ -41,18 +42,27 @@ function App() {
     const params =new URLSearchParams(formData);
     axios.get(`/api/search?${params}`)
     .then((res)=>{
-      console.log(res.data)
-      updateShownData({
-        ...shownData,
-        'preview_url': res.data.preview_url,
-        'real_name': res.data.real_name,
-        'artist': res.data.artist,
-        'image_url': res.data.image_url,
-      })
-      console.log(shownData)
+      const items = JSON.parse(res.data)
+      console.log('raw')
+      console.log(items)
+      console.log(items.data)
+      updateShownData(
+          items.data
+      )
+      console.log('hongsun')
+      console.log(shownData.items)
       
     });
   };
+  const handleRemix= (e) =>{
+    const params =new URLSearchParams(formData);
+    axios.get(`/api/remix?${params}`)
+    .then((res)=>{
+      const items = JSON.parse(res.data)
+      console.log(items)
+    });
+  }; 
+  
 
   return (
     <div className="App">
@@ -61,19 +71,36 @@ function App() {
         <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>
-        <a href='/api/login'>LOgin</a>
-
+        <a href='/api/login'>Login</a>
+      <div>
+      </div>
         <input type='text' name='name' onChange={handleChange}/>
         <button onClick={handleSearch}>SEARCH</button>
-        <audio controls src = {shownData.preview_url}></audio>
-        <div>
-          <p>Found name: {shownData.real_name} </p>
-          <p>artist: {shownData.artist} </p>
-        </div>
-        <img src ={shownData.image_url}></img>
+        <Preview items = {shownData} handleRemix={handleRemix}></Preview>
       </header>
     </div>
   );
+}
+
+function Preview(props){
+  
+  console.log('Hello')
+  console.log(props.items)
+  console.log(props.items.length)
+  if ((props && props.items && props.items.length >0) &&  props.items[0].preview_url != null){
+    const res = props.items.map((item) => (
+      <div>
+        <p>Found name: {item.real_name} </p>
+        <p>artist: {item.artist} </p>
+        <img src ={item.image_url}></img>
+        <audio controls src = {item.preview_url}></audio>
+        <button onClick={props.handleRemix}>CHOOSE</button>
+      </div>
+    ));
+    return res
+   }else{
+    return <span></span>
+  }
 }
 
 export default App;
