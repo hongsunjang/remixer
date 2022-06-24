@@ -1,0 +1,1 @@
+Run : `run.sh` or `python infernece.py your_file.wav`

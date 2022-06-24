@@ -23,7 +23,7 @@ cfg = {
     'learning_rate': 1e-3
 }
 
-train_path = glob('/home/hahajjjun/Junha Park/REMIX/processed/*.png')
+train_path = glob('/home/hahajjjun/Junha Park/remixer/REMIX/processed/*.png')
 train_dataset = Custom_dataset(train_path)
 train_loader = DataLoader(train_dataset, shuffle=False, batch_size=cfg['batch_size'])
 device = torch.device('cuda')
@@ -56,7 +56,7 @@ def train(model, optimizer, cfg):
         if train_loss < best:
             best = train_loss
             best_latents = latents
-            torch.save(model.state_dict(), f'/home/hahajjjun/Junha Park/REMIX/best.pth')
+            torch.save(model.state_dict(), f'/home/hahajjjun/Junha Park/remixer/REMIX/best.pth')
         print(f'>>> Epoch: {epoch}, Average loss: {train_loss}')
     print('PLOTTING LOSS...')
     plt.title('MSE Reconstruction Loss')
