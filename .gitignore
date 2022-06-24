@@ -27,3 +27,4 @@ yarn-error.log*
 # data
 /REMIX/data
 /REMIX/processed
+/REMIX/cache/best.pth
