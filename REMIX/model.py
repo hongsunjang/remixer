@@ -63,7 +63,7 @@ class AE(nn.Module):
             nn.MaxPool2d(2,2)
         )
 
-        self.gap = nn.AvgPool2d(7,7)
+        self.gap = nn.MaxPool2d(7,7)
 
         #Decoder with Conv
 
@@ -75,41 +75,41 @@ class AE(nn.Module):
         )
         
         self.block7 = nn.Sequential(
-            nn.ConvTranspose2d(512, 256, 5, padding = 2),
+            nn.ConvTranspose2d(512, 256, 3, padding = 1),
             nn.ReLU(),
             nn.BatchNorm2d(256),
             nn.UpsamplingBilinear2d(scale_factor=2)
         )
 
         self.block8 = nn.Sequential(
-            nn.ConvTranspose2d(256, 128, 5, padding = 2),
+            nn.ConvTranspose2d(256, 128, 3, padding = 1),
             nn.ReLU(),
             nn.BatchNorm2d(128),
             nn.UpsamplingBilinear2d(scale_factor=2)
         )
 
         self.block9 = nn.Sequential(
-            nn.ConvTranspose2d(128, 64, 5, padding = 2),
+            nn.ConvTranspose2d(128, 64, 3, padding = 1),
             nn.ReLU(),
             nn.BatchNorm2d(64),
             nn.UpsamplingBilinear2d(scale_factor=2)
         )
 
         self.block10 = nn.Sequential(
-            nn.ConvTranspose2d(64, 64, 5, padding = 2),
+            nn.ConvTranspose2d(64, 64, 3, padding = 1),
             nn.ReLU(),
             nn.BatchNorm2d(64),
             nn.UpsamplingBilinear2d(scale_factor=2)
         )
 
         self.block11 = nn.Sequential(
-            nn.ConvTranspose2d(64, 64, 5, padding = 2),
+            nn.ConvTranspose2d(64, 64, 3, padding = 1),
             nn.ReLU(),
             nn.BatchNorm2d(64)
         )
 
         self.block12 = nn.Sequential(
-            nn.ConvTranspose2d(64, 3, 5, padding = 2),
+            nn.ConvTranspose2d(64, 3, 3, padding = 1),
             nn.Sigmoid()
         )
     
@@ -119,12 +119,12 @@ class AE(nn.Module):
         h = self.block2(h)
         h = self.block3(h)
         h = self.block4(h)
-        h = self.block5(h)
+        #h = self.block5(h)
 
         latent_vec = self.gap(h)
         #print(latent_vec.shape)
 
-        h = self.block6(h)
+        #h = self.block6(h)
         h = self.block7(h)
         h = self.block8(h)
         h = self.block9(h)
@@ -133,3 +133,22 @@ class AE(nn.Module):
         out = self.block12(h)
 
         return out, latent_vec
+    
+class autoencoder(nn.Module):
+    def __init__(self):
+        super(autoencoder, self).__init__()
+        self.encoder = nn.Sequential(
+            nn.Linear(784, 128),
+            nn.ReLU(True),
+            nn.Linear(128, 64),
+            nn.ReLU(True), nn.Linear(64, 12))
+        self.decoder = nn.Sequential(
+            nn.Linear(12, 64),
+            nn.ReLU(True),
+            nn.Linear(64, 128),
+            nn.ReLU(True), nn.Linear(128, 784), nn.Tanh())
+
+    def forward(self, x):
+        b = self.encoder(x)
+        x = self.decoder(b)
+        return x, b

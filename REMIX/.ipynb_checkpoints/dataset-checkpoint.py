@@ -14,11 +14,17 @@ class Custom_dataset(Dataset):
     def __getitem__(self, idx):
         path = self.img_path[idx]
         img = cv2.imread(path)
-        img = cv2.resize(img, (224, 224))
+        img = cv2.resize(img, (392, 392))
         img = np.transpose(img, (2,0,1))
+        img = img[1,:,:]
+        x = np.sum(img, axis = 0)
+        y = np.sum(img, axis = 1)
+        x = np.concatenate((x,y), axis=0)
+        x = np.clip(x, 0,4000)
+        x = (x-392)/4000
+        x = x.astype(np.float32)
         
         #img = A.VerticalFlip(p=0.5)(image=img)['image']
-        img = A.HorizontalFlip(p=0.5)(image=img)['image']
         #img = A.RandomRotate90(90, p=0.5)(image=img)['image']
         '''
          if self.mode=='train':
@@ -35,4 +41,4 @@ class Custom_dataset(Dataset):
         if self.mode=='test':
             img = transforms.ToTensor()(img)
         '''
-        return path, img
+        return path, x
